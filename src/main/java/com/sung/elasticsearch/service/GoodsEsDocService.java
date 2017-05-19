@@ -8,6 +8,8 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
+import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.highlight.HighlightBuilder;
 import org.slf4j.Logger;
@@ -91,6 +93,39 @@ public class GoodsEsDocService {
     public void deleteById(Long id) {
         goodsESDocRepository.delete(id);
     }
+
+
+    /**
+     *
+     *
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @param searchContent
+     * @return
+     */
+    public List<GoodsModel> searchGoods(Integer pageNumber,
+                                        Integer pageSize,
+                                        String searchContent) {
+        // 分页参数
+        Pageable pageable = new PageRequest(pageNumber, pageSize);
+
+        // Function Score Query
+        FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery()
+                .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("goodsName", searchContent)),ScoreFunctionBuilders.weightFactorFunction(1000))
+                .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("description", searchContent)),ScoreFunctionBuilders.weightFactorFunction(1000));
+
+        // 创建搜索 DSL 查询
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withPageable(pageable)
+                .withQuery(functionScoreQueryBuilder).build();
+
+        logger.info("\n searchGoods(): searchContent [" + searchContent + "] \n DSL  = \n " + searchQuery.getQuery().toString());
+
+        Page<GoodsModel> searchPageResults = goodsESDocRepository.search(searchQuery);
+        return searchPageResults.getContent();
+    }
+
 
     /**
      * 条件查询

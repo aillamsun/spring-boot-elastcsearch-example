@@ -135,6 +135,42 @@ Spring Boot(1.5.1.RELEASE) elastcsearch-2.4.1
 ```
 
 
+
+## function_score 权重查询
+```java
+    /**
+     *
+     *
+     *
+     * @param pageNumber
+     * @param pageSize
+     * @param searchContent
+     * @return
+     */
+    public List<GoodsModel> searchGoods(Integer pageNumber,
+                                        Integer pageSize,
+                                        String searchContent) {
+        // 分页参数
+        Pageable pageable = new PageRequest(pageNumber, pageSize);
+
+        // Function Score Query
+        FunctionScoreQueryBuilder functionScoreQueryBuilder = QueryBuilders.functionScoreQuery()
+                .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("goodsName", searchContent)),ScoreFunctionBuilders.weightFactorFunction(1000))
+                .add(QueryBuilders.boolQuery().should(QueryBuilders.matchQuery("description", searchContent)),ScoreFunctionBuilders.weightFactorFunction(1000));
+
+        // 创建搜索 DSL 查询
+        SearchQuery searchQuery = new NativeSearchQueryBuilder()
+                .withPageable(pageable)
+                .withQuery(functionScoreQueryBuilder).build();
+
+        logger.info("\n searchGoods(): searchContent [" + searchContent + "] \n DSL  = \n " + searchQuery.getQuery().toString());
+
+        Page<GoodsModel> searchPageResults = goodsESDocRepository.search(searchQuery);
+        return searchPageResults.getContent();
+    }
+```
+
+
 ------
 
 ## Test Code

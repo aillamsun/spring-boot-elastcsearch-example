@@ -167,6 +167,17 @@ public class GoodsESTest {
         System.out.println(JSON.toJSONString(result));
     }
 
+
+    /**
+     * 分词 分页查询
+     */
+    @Test
+    public void testSelect4() {
+        List<GoodsModel> goodsModels = goodsEsDocService.searchGoods(1,10,"百事可乐拉罐");
+        System.out.println(JSON.toJSONString(goodsModels));
+    }
+
+
     /**
      * 分词 查询 商品名称 and 描述 价格排序
      */
