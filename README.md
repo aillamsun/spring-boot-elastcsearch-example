@@ -48,7 +48,7 @@ Spring Boot(1.5.1.RELEASE) elastcsearch-2.4.1
      * @param basePage        分页
      * @return
      */
-    public BasePage<GoodsESDoc> queryPage(Map<String, Object> filedContentMap, final List<String> heightFields, String[] sortFields, String order, BasePage<GoodsESDoc> basePage, String[] resultFields) {
+    public BasePage<GoodsModel> queryPage(Map<String, Object> filedContentMap, final List<String> heightFields, String[] sortFields, String order, BasePage<GoodsModel> basePage, String[] resultFields) {
 
         HighlightBuilder.Field[] hfields = new HighlightBuilder.Field[0];
         if (heightFields != null) {
@@ -94,10 +94,10 @@ Spring Boot(1.5.1.RELEASE) elastcsearch-2.4.1
         }
 
 
-        Page<GoodsESDoc> page = null;
+        Page<GoodsModel> page = null;
         //如果设置高亮
         if (heightFields != null && heightFields.size() > 0) {
-            page = elasticsearchTemplate.queryForPage(searchQuery, GoodsESDoc.class, new SearchResultMapper() {
+            page = elasticsearchTemplate.queryForPage(searchQuery, GoodsModel.class, new SearchResultMapper() {
                 @SuppressWarnings("unchecked")
                 @Override
                 public <T> AggregatedPage<T> mapResults(SearchResponse response, Class<T> clazz, Pageable pageable) {
@@ -114,7 +114,7 @@ Spring Boot(1.5.1.RELEASE) elastcsearch-2.4.1
                                 entityMap.put(highName, highValue);
                             }
                         }
-                        chunk.add((T) PropertyHelper.getFansheObj(GoodsESDoc.class, entityMap));
+                        chunk.add((T) PropertyHelper.getFansheObj(GoodsModel.class, entityMap));
                     }
                     if (chunk.size() > 0) {
                         return new AggregatedPageImpl<T>((List<T>) chunk);
@@ -125,7 +125,7 @@ Spring Boot(1.5.1.RELEASE) elastcsearch-2.4.1
             });
         } else {//如果不设置高亮
             logger.info("#################" + qb.toString());
-            page = elasticsearchTemplate.queryForPage(searchQuery, GoodsESDoc.class);
+            page = elasticsearchTemplate.queryForPage(searchQuery, GoodsModel.class);
         }
         basePage.setTotalRecord(page.getTotalElements());
         basePage.setResults(page.getContent());
